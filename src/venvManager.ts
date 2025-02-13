@@ -9,6 +9,7 @@ export class VirtualEnvManager {
    */
   createVenv(venvPath: string, pythonPath: string = "python"): Promise<void> {
     return new Promise(async (resolve, reject) => {
+      // Check if the virtual environment already exists before creating it.
       if (await this.existsVenv(venvPath)) {
         console.log(`Virtual environment at ${venvPath} already exists.`);
         resolve();
@@ -34,14 +35,39 @@ export class VirtualEnvManager {
     });
   }
 
-  // Check if a virtual environment exists at the given path.
-  // Note: This method does not check if the virtual environment is active.
+  /**
+   * Check if a virtual environment exists at the specified path.
+   *
+   * @param venvPath - The path to the virtual environment.
+   * @returns A promise that resolves to `true` if the virtual environment exists, and `false` otherwise.
+   *
+   * @remarks
+   * This function uses the `fsPromises.access` method to check if the virtual environment directory exists.
+   * If the directory exists, the function resolves to `true`; otherwise, it resolves to `false`.
+   *
+   * @example
+   * ```typescript
+   * const venvManager = new VirtualEnvManager();
+   * const venvPath = "path/to/virtual/environment";
+   *
+   * try {
+   *   const venvExists = await venvManager.existsVenv(venvPath);
+   *   if (venvExists) {
+   *     console.log("Virtual environment exists.");
+   *   } else {
+   *     console.log("Virtual environment does not exist.");
+   *   }
+   * } catch (error) {
+   *   console.error("Error checking virtual environment:", error);
+   * }
+   * ```
+   */
   async existsVenv(venvPath: string): Promise<boolean> {
     try {
       await fsPromises.access(venvPath, fsPromises.constants.F_OK);
       return true;
     } catch (e) {
-      return false;
+      throw e;
     }
   }
 
@@ -50,8 +76,12 @@ export class VirtualEnvManager {
    * @param venvPath The path to the virtual environment.
    */
   async deleteVenv(venvPath: string): Promise<void> {
-    console.log(`Deleting virtual environment at ${venvPath}...`);
-    await fsPromises.rm(venvPath, { recursive: true, force: true });
-    console.log(`Virtual environment at ${venvPath} deleted.`);
+    try {
+      console.log(`Deleting virtual environment at ${venvPath}...`);
+      await fsPromises.rm(venvPath, { recursive: true, force: true });
+      console.log(`Virtual environment at ${venvPath} deleted.`);
+    } catch (error) {
+      throw error;
+    }
   }
 }

@@ -10,7 +10,7 @@ export class PythonVersionManager {
       const cmd = "pyenv";
       const args = ["install", version];
       console.log(`Installing Python ${version} via pyenv...`);
-      const proc = spawn(cmd, args, { stdio: "inherit" });
+      const proc = spawn(cmd, args, { stdio: "inherit", shell: true });
       proc.on("error", (err) => {
         reject(new Error(`Failed to start pyenv: ${err.message}`));
       });
@@ -32,9 +32,9 @@ export class PythonVersionManager {
   uninstallVersion(version: string): Promise<void> {
     return new Promise((resolve, reject) => {
       const cmd = "pyenv";
-      const args = ["uninstall", "-f", version];
+      const args = ["uninstall", version];
       console.log(`Uninstalling Python ${version} via pyenv...`);
-      const proc = spawn(cmd, args, { stdio: "inherit" });
+      const proc = spawn(cmd, args, { stdio: "inherit", shell: true });
       proc.on("error", (err) => {
         reject(new Error(`Failed to start pyenv: ${err.message}`));
       });
@@ -55,8 +55,12 @@ export class PythonVersionManager {
   listInstalledVersions(): Promise<string[]> {
     return new Promise((resolve, reject) => {
       const cmd = "pyenv";
-      const args = ["versions", "--bare"];
-      const proc = spawn(cmd, args, { stdio: ["ignore", "pipe", "pipe"] });
+      const args = ["versions"];
+
+      const proc = spawn(cmd, args, {
+        stdio: ["inherit", "pipe", "pipe"],
+        shell: true,
+      });
       let output = "";
       proc.stdout.on("data", (data) => {
         output += data.toString();
@@ -79,24 +83,63 @@ export class PythonVersionManager {
   }
 
   /**
-   * Set the global Python version via pyenv.
-   * @param version The version to set as global.
+   * Set the local Python version via pyenv.
+   * @param version The version to set as local.
    */
-  setGlobalVersion(version: string): Promise<void> {
+  setLocalVersion(version: string): Promise<void> {
     return new Promise((resolve, reject) => {
       const cmd = "pyenv";
-      const args = ["global", version];
-      console.log(`Setting global Python version to ${version} via pyenv...`);
-      const proc = spawn(cmd, args, { stdio: "inherit" });
+      const args = ["local", version];
+      const proc = spawn(cmd, args, {
+        stdio: ["inherit", "pipe", "pipe"],
+        shell: true,
+      });
       proc.on("error", (err) => {
         reject(new Error(`Failed to start pyenv: ${err.message}`));
       });
       proc.on("close", (code) => {
         if (code === 0) {
-          console.log(`Global Python version set to ${version}.`);
+          console.log(`Local Python version set to ${version}.`);
           resolve();
         } else {
-          reject(new Error(`pyenv global exited with code ${code}`));
+          reject(new Error(`pyenv local exited with code ${code}`));
+        }
+      });
+    });
+  }
+
+  /**
+   * Retrieves the local Python version set by pyenv.
+   *
+   * This function executes the 'pyenv local' command to get the currently set local Python version.
+   * It uses Node.js child process to spawn a shell command and capture its output.
+   *
+   * @returns A Promise that resolves with a string representing the local Python version.
+   *          The version string is trimmed of any leading or trailing whitespace.
+   * @throws Will reject the promise with an Error if the pyenv command fails to start or exits with a non-zero code.
+   */
+  getLocalVersion(): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const cmd = "pyenv";
+      const args = ["local"];
+
+      const proc = spawn(cmd, args, {
+        stdio: ["inherit", "pipe", "pipe"],
+        shell: true,
+      });
+      let output = "";
+      proc.stdout.on("data", (data) => {
+        output += data.toString();
+      });
+      proc.on("error", (err) => {
+        reject(new Error(`Failed to start pyenv: ${err.message}`));
+      });
+      proc.on("close", (code) => {
+        if (code === 0) {
+          const version = output.trim();
+          resolve(version);
+        } else {
+          reject(new Error(`pyenv local command exited with code ${code}`));
         }
       });
     });

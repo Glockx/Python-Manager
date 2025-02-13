@@ -15,17 +15,22 @@ export class PythonInstaller {
    * @returns The path to the Python executable.
    */
   async ensurePythonInstalled(version: string = "3.9.1"): Promise<string> {
+    // On Windows, use pyenv-win, check if it's installed.
+    if (process.platform === "win32") {
+      if (!(await this.commandExists("pyenv"))) {
+        await this.installPyenvWin();
+      }
+    }
+
+    // Find the existing Python installation.
     const existing = await this.findPython(version);
-    console.log("existing", existing);
+
     if (existing) {
       console.log(`Found existing Python: ${existing}`);
       return existing;
     }
+
     if (process.platform === "win32") {
-      // On Windows, use pyenv-win.
-      if (!(await this.commandExists("pyenv"))) {
-        await this.installPyenvWin();
-      }
       // Install Given Python Version With pyenv-win.
       await this.installPythonViaPyenv(version);
 
@@ -48,13 +53,13 @@ export class PythonInstaller {
    */
   async findPython(version: string): Promise<string | null> {
     try {
-      const { stdout } = await execPromise(`pyenv shell ${version}`);
-      console.log(stdout);
-      return this.getPythonPathFromPyenv(version);
+      const result = await execPromise(`pyenv local ${version}`);
     } catch (error) {
       console.log(`Python ${version} not found. Installing...`);
       return null;
     }
+
+    return this.getPythonPathFromPyenv(version);
   }
 
   /**
@@ -153,19 +158,22 @@ export class PythonInstaller {
    * Retrieves the path to the Python executable for a given version installed via pyenv.
    */
   async getPythonPathFromPyenv(version: string): Promise<string> {
-    const { stdout } = await execPromise(
-      `python -c "import sys; print(sys.executable)"`
-    );
-    const prefix = stdout.trim();
-    console.log(stdout);
-    console.log(`prefix: ${prefix} (Python ${version} installed via pyenv)`);
-
-    if (!fs.existsSync(prefix)) {
-      throw new Error(
-        `Python executable not found in pyenv prefix for version ${version}`
+    try {
+      const { stdout } = await execPromise(
+        `python -c "import sys; print(sys.executable)"`
       );
+      const prefix = stdout.trim();
+
+      if (!fs.existsSync(prefix)) {
+        throw new Error(
+          `Python executable not found in pyenv prefix for version ${version} `
+        );
+      }
+      return prefix;
+    } catch (error) {
+      console.error("Error getting Python path:", error);
+      throw error;
     }
-    return prefix;
   }
 
   /**
