@@ -56,7 +56,7 @@ export class PythonInstaller {
   /**
    * Checks whether a Python command exists by attempting to get its version.
    */
-  async findPython(version: string): Promise<string | null> {
+  private async findPython(version: string): Promise<string | null> {
     try {
       const result = await execPromise(`pyenv local ${version}`);
     } catch (error) {
@@ -85,7 +85,7 @@ export class PythonInstaller {
   /**
    * Installs pyenv-win on Windows by running the provided PowerShell command.
    */
-  async installPyenvWin(): Promise<void> {
+  private async installPyenvWin(): Promise<void> {
     console.log("Installing pyenv-win on Windows...");
     return new Promise((resolve, reject) => {
       // This PowerShell command downloads and runs the pyenv-win installer script.
@@ -214,7 +214,7 @@ export class PythonInstaller {
   /**
    * Executes a command with the provided arguments.
    */
-  async execCommand(command: string, args: string[]): Promise<void> {
+  private async execCommand(command: string, args: string[]): Promise<void> {
     return new Promise((resolve, reject) => {
       const proc = spawn(command, args, { stdio: "inherit" });
       proc.on("error", (err) => {

@@ -3,7 +3,6 @@ import { VirtualEnvManager } from "./src/venvManager";
 import { PipManager } from "./src/pipManager";
 import { PythonExecutor } from "./src/pythonExecutor";
 import { PythonVersionManager } from "./src/pythonVersionManager";
-import * as path from "path";
 
 async function runTests() {
   // Ensure Python is installed (this will use pyenv-win on Windows).
@@ -19,12 +18,12 @@ async function runTests() {
 
   try {
     const venvPath = "./.myenv";
-    await venvManager.createVenv(venvPath, pythonCmd);
+    const venvPythonPath = await venvManager.createVenv(venvPath, pythonCmd);
 
-    const isWin = process.platform === "win32";
-    const venvPython = isWin
-      ? path.join(venvPath, "Scripts", "python.exe")
-      : path.join(venvPath, "bin", "python");
+    await pipManager.installMultiple(
+      ["numpy", "pandas", "matplotlib"],
+      venvPythonPath
+    );
 
     // Cleanup: uninstall the package and delete the virtual environment.
     // await venvManager.deleteVenv(venvPath);

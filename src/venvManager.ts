@@ -1,5 +1,6 @@
 import { spawn } from "child_process";
 import { promises as fsPromises } from "fs";
+import path from "path";
 
 export class VirtualEnvManager {
   /**
@@ -7,27 +8,39 @@ export class VirtualEnvManager {
    * @param venvPath The path where the virtual environment will be created.
    * @param pythonPath The Python executable to use (defaults to "python").
    */
-  createVenv(venvPath: string, pythonPath: string = "python"): Promise<void> {
+  createVenv(venvPath: string, pythonPath: string = "python"): Promise<string> {
     return new Promise(async (resolve, reject) => {
       // Check if the virtual environment already exists before creating it.
-      if (await this.existsVenv(venvPath)) {
+      if (await this.isEnvExsits(venvPath)) {
         console.log(`Virtual environment at ${venvPath} already exists.`);
-        resolve();
+
+        const isWin = process.platform === "win32";
+        const venvPython = isWin
+          ? path.join(venvPath, "Scripts", "python.exe")
+          : path.join(venvPath, "bin", "python");
+
+        resolve(venvPython);
         return;
       }
 
       console.log(
         `Creating virtual environment at ${venvPath} using ${pythonPath}...`
       );
+
       const args = ["-m", "venv", venvPath];
-      const proc = spawn(pythonPath, args, { stdio: "inherit" });
+      const proc = spawn(pythonPath, args, { stdio: "inherit", shell: true });
       proc.on("error", (err) => {
         reject(new Error(`Failed to start Python: ${err.message}`));
       });
       proc.on("close", (code) => {
         if (code === 0) {
           console.log(`Virtual environment created at ${venvPath}.`);
-          resolve();
+          const isWin = process.platform === "win32";
+          const venvPython = isWin
+            ? path.join(venvPath, "Scripts", "python.exe")
+            : path.join(venvPath, "bin", "python");
+
+          resolve(venvPython);
         } else {
           reject(new Error(`Python venv creation exited with code ${code}`));
         }
@@ -62,12 +75,13 @@ export class VirtualEnvManager {
    * }
    * ```
    */
-  async existsVenv(venvPath: string): Promise<boolean> {
+  async isEnvExsits(venvPath: string): Promise<boolean> {
     try {
       await fsPromises.access(venvPath, fsPromises.constants.F_OK);
       return true;
     } catch (e) {
-      throw e;
+      console.log(`Virtual environment at ${venvPath} does not exist.`);
+      return false;
     }
   }
 
@@ -76,12 +90,26 @@ export class VirtualEnvManager {
    * @param venvPath The path to the virtual environment.
    */
   async deleteVenv(venvPath: string): Promise<void> {
-    try {
-      console.log(`Deleting virtual environment at ${venvPath}...`);
-      await fsPromises.rm(venvPath, { recursive: true, force: true });
-      console.log(`Virtual environment at ${venvPath} deleted.`);
-    } catch (error) {
-      throw error;
-    }
+    return new Promise(async (resolve, reject) => {
+      // Check if the virtual environment exists before deleting it.
+      if (!(await this.isEnvExsits(venvPath))) {
+        console.log(`Virtual environment at ${venvPath} does not exist.`);
+        resolve();
+        return;
+      }
+
+      try {
+        // Remove the directory recursively.
+        await fsPromises.rm(venvPath, { recursive: true, force: true });
+        console.log(`Virtual environment at ${venvPath} has been deleted.`);
+        resolve();
+      } catch (err: any) {
+        reject(
+          new Error(
+            `Failed to delete virtual environment at ${venvPath}: ${err.message}`
+          )
+        );
+      }
+    });
   }
 }
