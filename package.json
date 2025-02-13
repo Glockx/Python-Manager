@@ -23,7 +23,9 @@
   "peerDependencies": {
     "typescript": "^5.0.0"
   },
-  "dependencies": {},
+  "dependencies": {
+    "sudo-prompt": "^9.2.1"
+  },
   "jest": {
     "preset": "ts-jest",
     "testEnvironment": "node"

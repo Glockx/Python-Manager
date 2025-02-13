@@ -2,10 +2,15 @@ import { spawn, exec } from "child_process";
 import * as fs from "fs";
 import * as path from "path";
 import { promisify } from "util";
+import sudo from "sudo-prompt";
+import { PythonVersionManager } from "pythonVersionManager";
 
 const execPromise = promisify(exec);
 
 export class PythonInstaller {
+  // Python version manager instance.
+  private pythonVersionManager = new PythonVersionManager();
+
   /**
    * Ensures that a Python executable is available.
    * If found on the system, returns its command name.
@@ -147,11 +152,41 @@ export class PythonInstaller {
     }
     console.log(`Installing Python ${version} via pyenv...`);
     // await this.execCommand("pyenv", ["install", version]);
-    await execPromise(`pyenv install ${version}`);
-    await execPromise(`pyenv local ${version}`);
-    const { stdout } = await execPromise(`pyenv local`);
-    console.log(`Has Set Local To: ${stdout.trim()}`);
-    console.log(`Python ${version} installed via pyenv.`);
+    try {
+      // Disable Protections to install Python.
+      await this.disableAdminRights();
+      // Install the specified Python version.
+      await this.pythonVersionManager.installVersion(version);
+      // Set the specified Python version as the local version.
+      await this.pythonVersionManager.setLocalVersion(version);
+
+      // Check if the Python version was successfully installed.
+      const { stdout } = await execPromise(`pyenv local`);
+      console.log(`Local Versions Has Set To: ${stdout.trim()}`);
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  // Disables administrative rights for the current process.
+  private disableAdminRights(): Promise<boolean> {
+    const options = {
+      name: "MonitorDogPythonInstaller",
+    };
+
+    const command =
+      'powershell -Command "Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope LocalMachine"';
+
+    return new Promise((resolve, reject) => {
+      sudo.exec(command, options, (error, stdout, stderr) => {
+        if (error) {
+          console.error(`Error: ${error}`);
+          reject(error);
+        } else {
+          resolve(true);
+        }
+      });
+    });
   }
 
   /**
