@@ -63,10 +63,12 @@ export class PythonExecutor {
    * Execute arbitrary Python code.
    * @param code The Python code to execute.
    * @param pythonPath The Python executable to use (defaults to "python").
+   * @param withStream If true, streams output live to the console (defaults to false).
    */
   runCode(
     code: string,
-    pythonPath: string = "python"
+    pythonPath: string = "python",
+    withStream: boolean = false
   ): Promise<ExecutionResult> {
     return new Promise((resolve, reject) => {
       console.log(`Executing Python code using ${pythonPath}...`);
@@ -76,10 +78,18 @@ export class PythonExecutor {
       let stdout = "";
       let stderr = "";
       proc.stdout.on("data", (data) => {
-        stdout += data.toString();
+        const chunk = data.toString();
+        stdout += chunk;
+        if (withStream) {
+          process.stdout.write(chunk);
+        }
       });
       proc.stderr.on("data", (data) => {
-        stderr += data.toString();
+        const chunk = data.toString();
+        stderr += chunk;
+        if (withStream) {
+          process.stderr.write(chunk);
+        }
       });
       proc.on("error", (err) => {
         reject(new Error(`Failed to execute code: ${err.message}`));
