@@ -25,6 +25,13 @@ async function runTests() {
       venvPythonPath
     );
 
+    executor.runCode(
+      "import numpy as np\nprint(np.__version__)",
+      venvPythonPath
+    );
+
+    pipManager.install("pytest", venvPythonPath);
+
     // Cleanup: uninstall the package and delete the virtual environment.
     // await venvManager.deleteVenv(venvPath);
     console.log("Test completed successfully.");
