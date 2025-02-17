@@ -78,10 +78,7 @@ export class VirtualEnvManager {
    */
   async isEnvExsits(venvPath: string): Promise<boolean> {
     try {
-      await fsPromises.access(
-        wrapFolderWithQuotes(venvPath),
-        fsPromises.constants.F_OK
-      );
+      await fsPromises.access(venvPath, fsPromises.constants.F_OK);
       return true;
     } catch (e) {
       console.log(`Virtual environment at ${venvPath} does not exist.`);
