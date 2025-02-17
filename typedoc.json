@@ -1,0 +1,9 @@
+{
+  "entryPoints": ["src/index.ts"],
+  "out": "docs",
+  "includeVersion": true,
+  "excludePrivate": true,
+  "excludeExternals": true,
+  "plugin": ["typedoc-material-theme"],
+  "themeColor": "#6fa8dc"
+}
