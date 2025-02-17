@@ -1,6 +1,7 @@
 import { spawn } from "child_process";
 import { promises as fsPromises } from "fs";
 import path from "path";
+import { wrapFolderWithQuotes } from "utils/utils";
 
 export class VirtualEnvManager {
   /**
@@ -27,7 +28,7 @@ export class VirtualEnvManager {
         `Creating virtual environment at ${venvPath} using ${pythonPath}...`
       );
 
-      const args = ["-m", "venv", venvPath];
+      const args = ["-m", "venv", wrapFolderWithQuotes(venvPath)];
       const proc = spawn(pythonPath, args, { stdio: "inherit", shell: true });
       proc.on("error", (err) => {
         reject(new Error(`Failed to start Python: ${err.message}`));
@@ -77,7 +78,10 @@ export class VirtualEnvManager {
    */
   async isEnvExsits(venvPath: string): Promise<boolean> {
     try {
-      await fsPromises.access(venvPath, fsPromises.constants.F_OK);
+      await fsPromises.access(
+        wrapFolderWithQuotes(venvPath),
+        fsPromises.constants.F_OK
+      );
       return true;
     } catch (e) {
       console.log(`Virtual environment at ${venvPath} does not exist.`);
