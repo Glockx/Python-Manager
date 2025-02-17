@@ -63,6 +63,7 @@ export class PythonInstaller {
   private async findPython(version: string): Promise<string | null> {
     try {
       const result = await execPromise(`pyenv local ${version}`);
+      console.log(result);
     } catch (error) {
       console.log(`Python ${version} not found. Installing...`);
       return null;
