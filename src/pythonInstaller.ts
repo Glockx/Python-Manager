@@ -127,7 +127,8 @@ export class PythonInstaller {
       console.log("pyenv installed.");
     }
     // Add pyenv to PATH for the current process.
-    process.env["PYENV_ROOT"] = pyenvRoot;
+    const pyenvRootKey = "PYENV_ROOT"; // Define key as a variable
+    process.env[pyenvRootKey] = pyenvRoot;
     process.env.PATH = `${path.join(pyenvRoot, "bin")}${path.delimiter}${
       process.env.PATH
     }`;
