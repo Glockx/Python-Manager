@@ -30,13 +30,17 @@ export class PythonManager {
     version: string = "3.9.1",
     pyenvPath: string
   ): Promise<string> {
-    const pythonPath = await this.pythonInstaller.ensurePythonInstalled(
-      version,
-      pyenvPath
-    );
-    this.pythonPath = pythonPath;
-    this.pythonVersion = version;
-    return pythonPath;
+    try {
+      const pythonPath = await this.pythonInstaller.ensurePythonInstalled(
+        version,
+        pyenvPath
+      );
+      this.pythonPath = pythonPath;
+      this.pythonVersion = version;
+      return pythonPath;
+    } catch (error) {
+      throw error;
+    }
   }
 
   /**
@@ -48,13 +52,17 @@ export class PythonManager {
     venvPath: string,
     pythonPathOverride?: string
   ): Promise<string> {
-    const pythonPath = pythonPathOverride || this.pythonPath;
-    const venvPythonPath = await this.venvManager.createVenv(
-      venvPath,
-      pythonPath
-    );
-    this.venvPythonPath = venvPythonPath; // Store venv python path
-    return venvPythonPath;
+    try {
+      const pythonPath = pythonPathOverride || this.pythonPath;
+      const venvPythonPath = await this.venvManager.createVenv(
+        venvPath,
+        pythonPath
+      );
+      this.venvPythonPath = venvPythonPath; // Store venv python path
+      return venvPythonPath;
+    } catch (error) {
+      throw error;
+    }
   }
 
   /**
@@ -62,8 +70,12 @@ export class PythonManager {
    * @param venvPath The path to the virtual environment.
    */
   deleteVenv(venvPath: string): Promise<void> {
-    this.venvPythonPath = null; // Clear venv python path as it's deleted
-    return this.venvManager.deleteVenv(venvPath);
+    try {
+      this.venvPythonPath = null; // Clear venv python path as it's deleted
+      return this.venvManager.deleteVenv(venvPath);
+    } catch (error) {
+      throw error;
+    }
   }
 
   /**
@@ -73,7 +85,11 @@ export class PythonManager {
    * @returns A promise that resolves to `true` if the virtual environment exists, and `false` otherwise.
    */
   isEnvExsits(venvPath: string): Promise<boolean> {
-    return this.venvManager.isEnvExsits(venvPath);
+    try {
+      return this.venvManager.isEnvExsits(venvPath);
+    } catch (error) {
+      throw error;
+    }
   }
 
   /**
