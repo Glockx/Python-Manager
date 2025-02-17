@@ -106,4 +106,63 @@ export class PipManager {
       });
     });
   }
+
+  /**
+   * Checks if a Python package is installed.
+   * @param packageName The package name to check.
+   * @param pythonPath The Python executable to use (defaults to "python").
+   * @returns A Promise that resolves to true if the package is installed, false otherwise.
+   */
+  async isPackageInstalled(
+    pythonPath: string = "python",
+    packageName: string
+  ): Promise<boolean> {
+    try {
+      // Get List Of All Installed Packages
+      const installedPackages = await this.listInstalledPackages(pythonPath);
+
+      for (const pkg of installedPackages) {
+        if (pkg.includes(packageName)) {
+          return true;
+        }
+      }
+
+      return false;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  /**
+   * Checks if multiple Python packages are installed.
+   * @param packageNames An array of package names to check.
+   * @param pythonPath The Python executable to use (defaults to "python").
+   * @returns A Promise that resolves to true if all packages are installed, false otherwise.
+   */
+  async arePackagesInstalled(
+    pythonPath: string = "python",
+    packageNames: string[]
+  ): Promise<boolean> {
+    try {
+      // Get List Of All Installed Packages
+      const installedPackages = await this.listInstalledPackages(pythonPath);
+
+      for (const packageName of packageNames) {
+        let packageFound = false;
+        for (const pkg of installedPackages) {
+          if (pkg.includes(packageName)) {
+            packageFound = true;
+            break; // Found the package, move to the next package name
+          }
+        }
+        if (!packageFound) {
+          return false; // If any package is not found, return false immediately
+        }
+      }
+
+      return true; // All packages were found
+    } catch (error) {
+      throw error;
+    }
+  }
 }

@@ -201,6 +201,41 @@ export class PythonManager {
   }
 
   /**
+   * Checks if a specific Python package is installed.
+   *
+   * @param packageName - The name of the package to check for installation.
+   * @param pythonPathOverride - Optional. The path to the Python executable to use.
+   *                             If not provided, it will use the virtual environment's Python path if available,
+   *                             or fall back to the default Python path.
+   * @returns A Promise that resolves to a boolean indicating whether the package is installed (true) or not (false).
+   */
+  isPackageInstalled(
+    packageName: string,
+    pythonPathOverride?: string
+  ): Promise<boolean> {
+    const pythonPath =
+      pythonPathOverride || this.venvPythonPath || this.pythonPath;
+
+    return this.pipManager.isPackageInstalled(pythonPath, packageName);
+  }
+
+  /**
+   * Checks if multiple Python packages are installed.
+   *
+   * @param packageNames - An array of package names to check for installation.
+   * @param pythonPathOverride - Optional. The path to the Python executable to use.
+   *                             If not provided, it will use the virtual environment's Python path if available,
+   *                             or fall back to the default Python path.
+   * @returns A Promise that resolves to a boolean indicating whether all specified packages are installed (true) or not (false).
+   */
+  arePackagesInstalled(packageNames: string[], pythonPathOverride?: string) {
+    const pythonPath =
+      pythonPathOverride || this.venvPythonPath || this.pythonPath;
+
+    return this.pipManager.arePackagesInstalled(pythonPath, packageNames);
+  }
+
+  /**
    * Set the local Python version via pyenv.
    * @param version The version to set as local.
    */

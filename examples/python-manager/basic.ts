@@ -11,13 +11,15 @@ async function runTests() {
     const venvPath = "./.myenv";
     await pythonManager.createVenv(venvPath);
 
-    // No need to pass venvPythonPath anymore, it's used by default for subsequent operations
+    const arePackagesInstalled = await pythonManager.arePackagesInstalled([
+      "numpy",
+      "pandas",
+      "matplotlib",
+      "pytest",
+      "scipy",
+    ]);
 
-    const result = await pythonManager.runCode(
-      "import numpy as np\nprint(np.__version__)"
-    );
-
-    console.log(result);
+    await pythonManager.installPackage("numpy");
 
     // Cleanup: uninstall the package and delete the virtual environment.
     // await pythonManager.deleteVenv(venvPath);
