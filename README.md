@@ -37,7 +37,7 @@ A comprehensive TypeScript library for managing Python environments, installatio
   - Capture stdout/stderr and exit codes
   - Support for script arguments
 
-## Installation
+## 🔧 Installation
 
 ```bash
 npm install python-manager
@@ -47,11 +47,11 @@ yarn add python-manager
 bun add python-manager
 ```
 
-## Documentation
+## 📄 Documentation
 
 [Check The Documentation Website](https://glockx.github.io/Python-Manager/)
 
-## Usage
+## 🖥️🛠️ Usage
 
 ### Python Installation and Management
 

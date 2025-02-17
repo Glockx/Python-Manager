@@ -11,7 +11,9 @@
     "build:types": "tsc --emitDeclarationOnly",
     "build": "bun run build.ts",
     "prepublishOnly": "bun run build && bun run build:types",
-    "test": "jest"
+    "test": "jest",
+    "docs": "bun typedoc",
+    "updateDocs": "git subtree push --prefix docs origin gh-pages"
   },
   "devDependencies": {
     "@types/bun": "latest",
