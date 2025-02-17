@@ -23,11 +23,16 @@ export class PythonManager {
    * Otherwise, installs Python automatically using pyenv-win (on Windows)
    * or pyenv (on Linux/macOS).
    * @param version The Python version to ensure (default "3.9.1").
+   * @param pyenvPath The path to the pyenv executable.
    * @returns The path to the Python executable.
    */
-  async ensurePythonInstalled(version: string = "3.9.1"): Promise<string> {
+  async ensurePythonInstalled(
+    version: string = "3.9.1",
+    pyenvPath: string
+  ): Promise<string> {
     const pythonPath = await this.pythonInstaller.ensurePythonInstalled(
-      version
+      version,
+      pyenvPath
     );
     this.pythonPath = pythonPath;
     this.pythonVersion = version;

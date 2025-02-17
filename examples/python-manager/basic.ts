@@ -1,9 +1,13 @@
 import { PythonManager } from "../../src/PythonManager";
+import path from "path";
 
 async function runTests() {
   const pythonManager = new PythonManager();
-
-  const pythonCmd = await pythonManager.ensurePythonInstalled("3.10.1");
+  console.log(path.resolve(__dirname, "..", ".pyenv"));
+  const pythonCmd = await pythonManager.ensurePythonInstalled(
+    "3.10.1",
+    path.resolve(__dirname, "..", ".pyenv")
+  );
   console.log(`Using Python from: ${pythonCmd}`);
   // Create a virtual environment using the installed Python.
 

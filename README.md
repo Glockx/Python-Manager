@@ -61,7 +61,10 @@ import { PythonInstaller } from "python-manager";
 const installer = new PythonInstaller();
 
 // Ensure Python is installed (installs if not found)
-const pythonPath = await installer.ensurePythonInstalled("3.9.1");
+const pythonPath = await installer.ensurePythonInstalled(
+  "3.9.1",
+  "test/.pyenv"
+);
 
 // The installer will automatically:
 // - Install pyenv/pyenv-win if needed

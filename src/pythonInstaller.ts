@@ -17,9 +17,13 @@ export class PythonInstaller {
    * Otherwise, installs Python automatically using pyenv-win (on Windows)
    * or pyenv (on Linux/macOS).
    * @param version The Python version to ensure (default "3.9.1").
+   * @param pyenvPath The path to the pyenv executable (example "/usr/local/bin/.pyenv").
    * @returns The path to the Python executable.
    */
-  async ensurePythonInstalled(version: string = "3.9.1"): Promise<string> {
+  async ensurePythonInstalled(
+    version: string = "3.9.1",
+    pyenvPath: string
+  ): Promise<string> {
     // On Windows, use pyenv-win, check if it's installed.
     if (process.platform === "win32") {
       if (!(await this.commandExists("pyenv"))) {
@@ -44,7 +48,7 @@ export class PythonInstaller {
     } else if (process.platform === "linux" || process.platform === "darwin") {
       // On Linux/macOS, use pyenv.
       if (!(await this.commandExists("pyenv"))) {
-        await this.installPyenv();
+        await this.installPyenv(pyenvPath);
       }
       await this.installPythonViaPyenv(version);
       return await this.getPythonPathFromPyenv(version);
@@ -110,8 +114,7 @@ export class PythonInstaller {
   /**
    * Installs pyenv on Linux/macOS by cloning its repository.
    */
-  async installPyenv(): Promise<void> {
-    const pyenvRoot = path.resolve(__dirname, "..", ".pyenv");
+  async installPyenv(pyenvRoot: string): Promise<void> {
     if (fs.existsSync(pyenvRoot)) {
       console.log("pyenv already installed.");
     } else {
@@ -124,7 +127,7 @@ export class PythonInstaller {
       console.log("pyenv installed.");
     }
     // Add pyenv to PATH for the current process.
-    process.env.PYENV_ROOT = pyenvRoot;
+    process.env["PYENV_ROOT"] = pyenvRoot;
     process.env.PATH = `${path.join(pyenvRoot, "bin")}${path.delimiter}${
       process.env.PATH
     }`;

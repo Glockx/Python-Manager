@@ -1,3 +1,4 @@
+import path from "path";
 import { PythonInstaller } from "../../src/pythonInstaller";
 
 async function runTests() {
@@ -6,7 +7,10 @@ async function runTests() {
 
   try {
     // Make Sure Pyenv and Python are installed.
-    const pythonCmd = await installer.ensurePythonInstalled("3.10.1");
+    const pythonCmd = await installer.ensurePythonInstalled(
+      "3.10.1",
+      path.resolve(__dirname, "..", ".pyenv")
+    );
 
     console.log(`Using Python from: ${pythonCmd}`);
   } catch (error) {
