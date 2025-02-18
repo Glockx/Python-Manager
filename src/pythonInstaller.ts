@@ -18,11 +18,13 @@ export class PythonInstaller {
    * or pyenv (on Linux/macOS).
    * @param version The Python version to ensure (default "3.9.1").
    * @param pyenvPath The path to the pyenv executable (example "/usr/local/bin/.pyenv").
+   * @param venvPath Optional path to the virtual environment. This value is optional but could be required if the process is a ElectronJS application or process executable is located in protected folders on OS. So instead of checking the system folders, use non-protected folders for venv folder and check exsistence of the venv folder.
    * @returns The path to the Python executable.
    */
   async ensurePythonInstalled(
     version: string = "3.9.1",
-    pyenvPath: string
+    pyenvPath: string,
+    venvPath?: string
   ): Promise<string> {
     // On Windows, use pyenv-win, check if it's installed.
     if (process.platform === "win32") {
@@ -32,7 +34,7 @@ export class PythonInstaller {
     }
 
     // Find the existing Python installation.
-    const existing = await this.findPython(version);
+    const existing = await this.findPython(version, venvPath);
 
     if (existing) {
       console.log(`Found existing Python: ${existing}`);
@@ -60,7 +62,27 @@ export class PythonInstaller {
   /**
    * Checks whether a Python command exists by attempting to get its version.
    */
-  private async findPython(version: string): Promise<string | null> {
+  private async findPython(
+    version: string,
+    venvPath?: string
+  ): Promise<string | null> {
+    // If Venv Path Has Passed, Check Venv Path Exsistence by File System
+    if (venvPath && fs.existsSync(venvPath)) {
+      // Check Venv Python Path Exsistence
+      const isWin = process.platform === "win32";
+
+      // Construct Python Path
+      const pythonPath = isWin
+        ? path.join(venvPath, "Scripts", "python.exe")
+        : path.join(venvPath, "bin", "python");
+
+      if (fs.existsSync(pythonPath)) {
+        return pythonPath;
+      } else {
+        return null;
+      }
+    }
+
     try {
       const result = await execPromise(`pyenv local ${version}`);
       console.log(result);
@@ -199,10 +221,11 @@ export class PythonInstaller {
    */
   async getPythonPathFromPyenv(version: string): Promise<string> {
     try {
-      const { stdout } = await execPromise(
-        `python -c "import sys; print(sys.executable)"`
+      const result = await execPromise(
+        `python -c \"import sys; print(sys.executable)\"`,
+        {}
       );
-      const prefix = stdout.trim();
+      const prefix = result.stdout.trim();
 
       if (!fs.existsSync(prefix)) {
         throw new Error(

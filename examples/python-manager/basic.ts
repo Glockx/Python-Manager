@@ -3,7 +3,8 @@ import path from "path";
 
 async function runTests() {
   const pythonManager = new PythonManager();
-  console.log(path.resolve(__dirname, "..", ".pyenv"));
+  const venvPath = "./.myenv";
+
   const pythonCmd = await pythonManager.ensurePythonInstalled(
     "3.10.1",
     path.resolve(__dirname, "..", ".pyenv")
@@ -12,7 +13,6 @@ async function runTests() {
   // Create a virtual environment using the installed Python.
 
   try {
-    const venvPath = "./.myenv";
     await pythonManager.createVenv(venvPath);
 
     const arePackagesInstalled = await pythonManager.arePackagesInstalled([
