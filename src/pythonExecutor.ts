@@ -24,13 +24,10 @@ export class PythonExecutor {
   ): Promise<ExecutionResult> {
     return new Promise((resolve, reject) => {
       console.log(`Executing script: ${filePath} using ${pythonPath}...`);
-      const proc = spawn(
-        pythonPath,
-        [wrapFolderWithQuotes(filePath), ...args],
-        {
-          stdio: ["ignore", "pipe", "pipe"],
-        }
-      );
+      console.log(`Arguments: ${args.join(" ")}`);
+      const proc = spawn(pythonPath, [filePath, ...args], {
+        stdio: ["ignore", "pipe", "pipe"],
+      });
       let stdout = "";
       let stderr = "";
 
