@@ -173,16 +173,24 @@ export class PythonManager {
    * @param args Optional arguments to pass to the script.
    * @param withStream If true, streams output live to the console (defaults to false).
    * @param pythonPathOverride Optional Python executable path override. If not provided, and venvPythonPath is set, it will use venvPythonPath, otherwise default pythonPath.
+   * @param abortSignal Optional AbortSignal to cancel the execution.
    */
   runScript(
     filePath: string,
     args: string[] = [],
     withStream: boolean = false,
-    pythonPathOverride?: string
+    pythonPathOverride?: string,
+    abortSignal?: AbortSignal
   ): Promise<ExecutionResult> {
     const pythonPath =
       pythonPathOverride || this.venvPythonPath || this.pythonPath;
-    return this.executor.runScript(filePath, args, pythonPath, withStream);
+    return this.executor.runScript(
+      filePath,
+      args,
+      pythonPath,
+      withStream,
+      abortSignal
+    );
   }
 
   /**
@@ -190,15 +198,17 @@ export class PythonManager {
    * @param code The Python code to execute.
    * @param withStream If true, streams output live to the console (defaults to false).
    * @param pythonPathOverride Optional Python executable path override. If not provided, and venvPythonPath is set, it will use venvPythonPath, otherwise default pythonPath.
+   * @param abortSignal Optional AbortSignal to cancel the execution.
    */
   runCode(
     code: string,
     withStream: boolean = false,
-    pythonPathOverride?: string
+    pythonPathOverride?: string,
+    abortSignal?: AbortSignal
   ): Promise<ExecutionResult> {
     const pythonPath =
       pythonPathOverride || this.venvPythonPath || this.pythonPath;
-    return this.executor.runCode(code, pythonPath, withStream);
+    return this.executor.runCode(code, pythonPath, withStream, abortSignal);
   }
 
   /**
