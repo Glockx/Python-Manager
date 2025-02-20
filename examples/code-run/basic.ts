@@ -10,7 +10,6 @@ async function runTests() {
     path.resolve(__dirname, "..", ".pyenv")
   );
   console.log(`Using Python from: ${pythonCmd}`);
-  // Create a virtual environment using the installed Python.
 
   try {
     await pythonManager.createVenv(venvPath);
@@ -20,6 +19,8 @@ async function runTests() {
       [
         "--model-path",
         "C:/Users/nijat/Desktop/samsungOverlay/src/backend/pytorch/best.pt",
+        "--conf",
+        "0.3",
       ],
       true
     );

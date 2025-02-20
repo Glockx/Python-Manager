@@ -1,7 +1,8 @@
 import { PipManager } from "pipManager";
-import { ExecutionResult, PythonExecutor } from "pythonExecutor";
+import { PythonExecutor } from "pythonExecutor";
 import { PythonInstaller } from "pythonInstaller";
 import { PythonVersionManager } from "pythonVersionManager";
+import { ExecutionResult } from "Types/ExecutionResult";
 import { VirtualEnvManager } from "venvManager";
 
 export class PythonManager {
