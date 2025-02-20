@@ -7,7 +7,8 @@ async function runTests() {
 
   const pythonCmd = await pythonManager.ensurePythonInstalled(
     "3.10.1",
-    path.resolve(__dirname, "..", ".pyenv")
+    path.resolve(__dirname, "..", ".pyenv"),
+    undefined
   );
   console.log(`Using Python from: ${pythonCmd}`);
   // Create a virtual environment using the installed Python.

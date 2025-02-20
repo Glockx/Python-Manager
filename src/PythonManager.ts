@@ -26,18 +26,21 @@ export class PythonManager {
    * @param version The Python version to ensure (default "3.9.1").
    * @param pyenvPath The path to the pyenv executable.
    * @param venvPath Optional path to the virtual environment. This value is optional but could be required if the process is a ElectronJS application or process executable is located in protected folders on OS. So instead of checking the system folders, use non-protected folders for venv folder and check exsistence of the venv folder.
+   * @param runAfterPyenvInstallation Optional callback function to run after pyenv installation. Required if need to reset the shell.
    * @returns The path to the Python executable.
    */
   async ensurePythonInstalled(
     version: string = "3.9.1",
     pyenvPath: string,
-    venvPath?: string
+    venvPath?: string,
+    runAfterPyenvInstallation?: () => Promise<void>
   ): Promise<string> {
     try {
       const pythonPath = await this.pythonInstaller.ensurePythonInstalled(
         version,
         pyenvPath,
-        venvPath
+        venvPath,
+        runAfterPyenvInstallation
       );
       this.pythonPath = pythonPath;
       this.pythonVersion = version;

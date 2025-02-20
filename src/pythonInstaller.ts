@@ -19,17 +19,23 @@ export class PythonInstaller {
    * @param version The Python version to ensure (default "3.9.1").
    * @param pyenvPath The path to the pyenv executable (example "/usr/local/bin/.pyenv").
    * @param venvPath Optional path to the virtual environment. This value is optional but could be required if the process is a ElectronJS application or process executable is located in protected folders on OS. So instead of checking the system folders, use non-protected folders for venv folder and check exsistence of the venv folder.
+   * @param runAfterPyenvInstallation Optional callback function to run after pyenv installation. Required if need to reset the shell.
    * @returns The path to the Python executable.
    */
   async ensurePythonInstalled(
     version: string = "3.9.1",
     pyenvPath: string,
-    venvPath?: string
+    venvPath?: string,
+    runAfterPyenvInstallation?: () => Promise<void>
   ): Promise<string> {
     // On Windows, use pyenv-win, check if it's installed.
     if (process.platform === "win32") {
       if (!(await this.commandExists("pyenv"))) {
         await this.installPyenvWin();
+        // Run after pyenv installation if provided.
+        if (runAfterPyenvInstallation) {
+          await runAfterPyenvInstallation();
+        }
       }
     }
 
@@ -116,20 +122,35 @@ export class PythonInstaller {
     console.log("Installing pyenv-win on Windows...");
     await this.disableAdminRights();
     return new Promise((resolve, reject) => {
-      // This PowerShell command downloads and runs the pyenv-win installer script.
-      const psCommand = `Invoke-WebRequest -UseBasicParsing -Uri "https://raw.githubusercontent.com/pyenv-win/pyenv-win/master/pyenv-win/install-pyenv-win.ps1" -OutFile "./install-pyenv-win.ps1"; &"./install-pyenv-win.ps1"`;
+      const psCommand = `$dest="$env:USERPROFILE\\Documents"; $file=Join-Path $dest "install-pyenv-win.ps1"; Invoke-WebRequest -UseBasicParsing -Uri "https://raw.githubusercontent.com/pyenv-win/pyenv-win/master/pyenv-win/install-pyenv-win.ps1" -OutFile $file; & $file`;
       const proc = spawn("powershell.exe", ["-Command", psCommand], {
-        stdio: "inherit",
+        stdio: ["inherit", "pipe", "pipe"],
       });
+
+      let errorOutput = "";
+      proc.stdout.on("data", (data) => {
+        console.log(`stdout: ${data}`);
+      });
+
+      proc.stderr.on("data", (data) => {
+        errorOutput += data;
+        console.error(`stderr: ${data}`);
+      });
+
       proc.on("error", (err) => {
         reject(new Error(`Failed to start PowerShell: ${err.message}`));
       });
+
       proc.on("close", (code) => {
         if (code === 0) {
           console.log("pyenv-win installed successfully.");
           resolve();
         } else {
-          reject(new Error(`pyenv-win installation exited with code ${code}`));
+          reject(
+            new Error(
+              `pyenv-win installation exited with code ${code}. Error output: ${errorOutput}`
+            )
+          );
         }
       });
     });

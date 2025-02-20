@@ -176,3 +176,5 @@ dist
 
 .myenv
 .python-version
+
+local-tests
